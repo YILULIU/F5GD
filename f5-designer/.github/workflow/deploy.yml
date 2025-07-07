@@ -1,0 +1,49 @@
+# 工作流名称
+name: Deploy to GitHub Pages
+
+# 触发条件：当代码被推送到 main 分支时
+on:
+  push:
+    branches:
+      - main
+
+# 权限设置：允许此工作流写入gh-pages分支
+permissions:
+  contents: write
+
+# 任务
+jobs:
+  build-and-deploy:
+    # 任务名称
+    name: Build and Deploy
+    # 运行环境
+    runs-on: ubuntu-latest
+
+    steps:
+      # 步骤1: 检出代码
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 步骤2: 设置 Node.js 环境
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18' # 使用与您开发时一致的Node.js版本
+          cache: 'npm'
+
+      # 步骤3: 安装项目依赖
+      - name: Install dependencies
+        run: npm ci # 使用 ci 更快更稳定
+
+      # 步骤4: 构建应用
+      - name: Build
+        run: npm run build
+
+      # 步骤5: 部署到 GitHub Pages
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          # 这个 GITHUB_TOKEN 是由 GitHub Actions 自动提供的，无需您手动创建
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # build 文件夹是 create-react-app 默认的构建输出目录
+          publish_dir: ./build
